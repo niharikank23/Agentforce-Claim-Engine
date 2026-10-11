@@ -27,10 +27,12 @@ jobs:
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
 
-      # 4. Authenticate to Salesforce Org using formatted JSON
+      # 4. Authenticate to Salesforce Developer Org using secure env mapping
       - name: Authenticate Salesforce Org
+        env:
+        SFDX_AUTH_URL_SECRET: ${{ secrets.SFDX_AUTH_URL }}
         run: |
-          echo "{\"sfdxAuthUrl\": \"${{ secrets.SFDX_AUTH_URL }}\"}" > authFile.json
+          node -e "fs.writeFileSync('authFile.json', JSON.stringify({ sfdxAuthUrl: process.env.SFDX_AUTH_URL_SECRET }))"
           sf org login sfdx-url --sfdx-url-file authFile.json --alias DevOrg --set-default
           rm authFile.json
 
