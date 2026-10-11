@@ -13,35 +13,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the source code from your GitHub repository
+      # 1. Checkout repository code
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js runtime environment on the runner
+      # 2. Setup Node.js runtime environment
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      # 3. Install the official Salesforce CLI (sf)
+      # 3. Install Salesforce CLI
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
 
-      # 4. Authenticate to Salesforce Developer Org
+      # 4. Authenticate to Salesforce Org using formatted JSON
       - name: Authenticate Salesforce Org
-    run: |
-      echo "{\"sfdxAuthUrl\": \"${{ secrets.SFDX_AUTH_URL }}\"}" > authFile.json
-      sf org login sfdx-url --sfdx-url-file authFile.json --alias DevOrg --set-default
-      rm authFile.json
+        run: |
+          echo "{\"sfdxAuthUrl\": \"${{ secrets.SFDX_AUTH_URL }}\"}" > authFile.json
+          sf org login sfdx-url --sfdx-url-file authFile.json --alias DevOrg --set-default
+          rm authFile.json
 
-      # 5. Dry-run validation (Runs only when a Pull Request is opened against main)
+      # 5. Validate Metadata (Runs on Pull Requests)
       - name: Validate Metadata (PR Check)
         if: github.event_name == 'pull_request'
-        run: |
-          sf project deploy validate --manifest manifest/package.xml --target-org DevOrg
+        run: sf project deploy validate --manifest manifest/package.xml --target-org DevOrg
 
-      # 6. Actual deployment to Salesforce Org (Runs when code is merged or pushed directly to main)
+      # 6. Deploy Metadata (Runs on Push to Main)
       - name: Deploy Metadata to Salesforce Org
         if: github.event_name == 'push'
-        run: |
-          sf project deploy start --manifest manifest/package.xml --target-org DevOrg --wait 10
+        run: sf project deploy start --manifest manifest/package.xml --target-org DevOrg --wait 10
