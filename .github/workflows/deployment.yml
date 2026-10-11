@@ -27,12 +27,12 @@ jobs:
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
 
-      # 4. Authenticate to your Salesforce Developer Org using the Auth URL Secret
+      # 4. Authenticate to Salesforce Developer Org
       - name: Authenticate Salesforce Org
-        run: |
-          echo "${{ secrets.SFDX_AUTH_URL }}" > authFile.json
-          sf org login sfdx-url --sfdx-url-file authFile.json --alias DevOrg --set-default
-          rm authFile.json
+    run: |
+      echo "{\"sfdxAuthUrl\": \"${{ secrets.SFDX_AUTH_URL }}\"}" > authFile.json
+      sf org login sfdx-url --sfdx-url-file authFile.json --alias DevOrg --set-default
+      rm authFile.json
 
       # 5. Dry-run validation (Runs only when a Pull Request is opened against main)
       - name: Validate Metadata (PR Check)
